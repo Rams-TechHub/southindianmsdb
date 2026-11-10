@@ -30,7 +30,81 @@ catalogs: [
     { type: "movie", id: "imdb_malayalam_comedy", name: "😂 Ultimate Malayalam Comedies" },
     { type: "movie", id: "imdb_south_thrillers", name: "👁️ South Indian Masterpiece Thrillers" }
 ]
+const manualLists = {
+    "malayalam_classics": [
+        { id: "tt13854728", name: "Minnal Murali (2021)", type: "movie" },
+        { id: "tt1151608", name: "Manjummel Boys (2024)", type: "movie" },
+        { id: "tt1214319", name: "Aavesham (2024)", type: "movie" }
+    ],
+    "tamil_classics": [
+        { id: "tt21334812", name: "Leo (2023)", type: "movie" },
+        { id: "tt836010", name: "Vikram (2022)", type: "movie" }
+    ],
+    "telugu_classics": [
+        { id: "tt11658274", name: "RRR (2022)", type: "movie" },
+        { id: "tt2932994", name: "Baahubali: The Beginning (2015)", type: "movie" }
+    ],
+    "kannada_classics": [
+        { id: "tt505191", name: "K.G.F: Chapter 1 (2018)", type: "movie" },
+        { id: "tt916605", name: "Kantara (2022)", type: "movie" }
+    ],
 
+    // From: https://imdb.com
+    "imdb_top_tamil": [
+        { id: "tt0093603", name: "Nayagan (1987)", type: "movie" },
+        { id: "tt1509144", name: "Anbe Sivam (2003)", type: "movie" },
+        { id: "tt7019842", name: "Jai Bhim (2021)", type: "movie" },
+        { id: "tt13313074", name: "Soorarai Pottru (2020)", type: "movie" },
+        { id: "tt3013658", name: "Kaithi (2019)", type: "movie" },
+        { id: "tt4450374", name: "Vikram Vedha (2017)", type: "movie" },
+        { id: "tt10151654", name: "Asuran (2019)", type: "movie" },
+        { id: "tt5009174", name: "Super Deluxe (2019)", type: "movie" },
+        { id: "tt9133186", name: "96 (2018)", type: "movie" },
+        { id: "tt2707408", name: "Pariyerum Perumal (2018)", type: "movie" }
+    ],
+
+    // From: https://imdb.com
+    "imdb_top_telugu": [
+        { id: "tt0050694", name: "Mayabazar (1957)", type: "movie" },
+        { id: "tt6741496", name: "C/o Kancharapalem (2018)", type: "movie" },
+        { id: "tt9358052", name: "Jersey (2019)", type: "movie" },
+        { id: "tt4647310", name: "Arjun Reddy (2017)", type: "movie" },
+        { id: "tt3503120", name: "Baahubali 2: The Conclusion (2017)", type: "movie" },
+        { id: "tt7631622", name: "Mahanati (2018)", type: "movie" },
+        { id: "tt2126742", name: "Attarintiki Daredi (2013)", type: "movie" },
+        { id: "tt10080272", name: "Agent Sai Srinivasa Athreya (2019)", type: "movie" },
+        { id: "tt11051512", name: "Sita Ramam (2022)", type: "movie" },
+        { id: "tt0156942", name: "Siva (1989)", type: "movie" }
+    ],
+
+    // From: https://imdb.com (Malayalam Golden Age Comedy)
+    "imdb_malayalam_comedy": [
+        { id: "tt0104956", name: "Nadodikkattu (1987)", type: "movie" },
+        { id: "tt0102161", name: "Kilukkam (1991)", type: "movie" },
+        { id: "tt0134057", name: "Ramji Rao Speaking (1989)", type: "movie" },
+        { id: "tt0097444", name: "Godfather (1991)", type: "movie" },
+        { id: "tt0273801", name: "Mazha Peyyunnu Maddalam Kottunnu (1986)", type: "movie" },
+        { id: "tt0093693", name: "Pappan Priyappetta Pappan (1986)", type: "movie" },
+        { id: "tt0095843", name: "Pattanapravesham (1988)", type: "movie" },
+        { id: "tt0111400", name: "Thenmavin Kombath (1994)", type: "movie" },
+        { id: "tt0113745", name: "Mannar Mathai Speaking (1995)", type: "movie" },
+        { id: "tt0115012", name: "Sandhesam (1991)", type: "movie" }
+    ],
+
+    // From: https://imdb.com (High Rated South Thrillers)
+    "imdb_south_thrillers": [
+        { id: "tt2559534", name: "Drishyam (2013)", type: "movie" },
+        { id: "tt7060344", name: "Ratsasan (2018)", type: "movie" },
+        { id: "tt0107504", name: "Manichitrathazhu (1993)", type: "movie" },
+        { id: "tt11790718", name: "Drishyam 2 (2021)", type: "movie" },
+        { id: "tt3406114", name: "Thani Oruvan (2015)", type: "movie" },
+        { id: "tt11692058", name: "Jana Gana Mana (2022)", type: "movie" },
+        { id: "tt11815526", name: "Kuruthi (2021)", type: "movie" },
+        { id: "tt5782012", name: "Evaru (2019)", type: "movie" },
+        { id: "tt4161640", name: "Kshanam (2016)", type: "movie" },
+        { id: "tt1506890", name: "Lucia (2013)", type: "movie" }
+    ]
+};
 
 builder.defineCatalogHandler((args) => {
     const list = manualLists[args.id];
