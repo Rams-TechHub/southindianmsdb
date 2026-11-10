@@ -1,0 +1,9 @@
+{
+  "name": "south-indian-msdb-addon",
+  "version": "1.6.0",
+  "description": "Stremio and Nuvio custom serverless addon for South Indian content.",
+  "main": "api/manifest.js",
+  "dependencies": {
+    "stremio-addon-sdk": "^1.2.0"
+  }
+}
