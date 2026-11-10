@@ -18,12 +18,19 @@ const builder = new addonBuilder({
 });
 
 // Dummy database matching the catalog router logic
-const manualLists = {
-    "malayalam_classics": [{ id: "tmdb:13854728", name: "Minnal Murali (2021)", type: "movie", poster: "https://tmdb.org", ytTrailer: "ZmtvHe16D4w" }],
-    "tamil_classics": [{ id: "tmdb:21334812", name: "Leo (2023)", type: "movie", poster: "https://tmdb.org", ytTrailer: "Po3jjhYn_0I" }],
-    "telugu_classics": [{ id: "tmdb:11658274", name: "RRR (2022)", type: "movie", poster: "https://tmdb.org", ytTrailer: "NgBoMJy386M" }],
-    "kannada_classics": [{ id: "tmdb:505191", name: "K.G.F: Chapter 1 (2018)", type: "movie", poster: "https://tmdb.org", ytTrailer: "qXgF-iJ_ezE" }]
-};
+catalogs: [
+    { type: "movie", id: "malayalam_classics", name: "🏆 Malayalam Cult Classics" },
+    { type: "movie", id: "tamil_classics", name: "⚡ Tamil Blockbusters" },
+    { type: "movie", id: "telugu_classics", name: "🔥 Tollywood Mass Epics" },
+    { type: "movie", id: "kannada_classics", name: "💥 Sandalwood Masterpieces" },
+    
+    // Your new curated IMDb rows
+    { type: "movie", id: "imdb_top_tamil", name: "⭐ IMDb Top Rated Tamil" },
+    { type: "movie", id: "imdb_top_telugu", name: "💎 IMDb Top Rated Telugu" },
+    { type: "movie", id: "imdb_malayalam_comedy", name: "😂 Ultimate Malayalam Comedies" },
+    { type: "movie", id: "imdb_south_thrillers", name: "👁️ South Indian Masterpiece Thrillers" }
+]
+
 
 builder.defineCatalogHandler((args) => {
     const list = manualLists[args.id];
