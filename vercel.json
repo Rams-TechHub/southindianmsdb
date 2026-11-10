@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/", "destination": "/api/manifest" },
+    { "source": "/:apikey/manifest.json", "destination": "/api/manifest" },
+    { "source": "/:apikey/catalog/:type/:id.json", "destination": "/api/manifest" },
+    { "source": "/:apikey/meta/:type/:id.json", "destination": "/api/manifest" },
+    { "source": "/:apikey/stream/:type/:id.json", "destination": "/api/manifest" }
+  ]
+}
