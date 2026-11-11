@@ -246,7 +246,7 @@ const htmlLandingPage = `<!DOCTYPE html>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background: #09090e; 
-            background-image: linear-gradient(to bottom, rgba(9, 9, 14, 0.75), rgba(9, 9, 14, 0.95)), url('https://ibb.co'); /* Placed your customized backdrop url */
+            background-image: linear-gradient(to bottom, rgba(9, 9, 14, 0.75), rgba(9, 9, 14, 0.95)), url('https://i.ibb.co/LDpPXv9w/Gemini-Generated-Image-ga4cngga4cngga4c.jpg'); /* Placed your customized backdrop url */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -263,7 +263,7 @@ const htmlLandingPage = `<!DOCTYPE html>
             width: 100%;
             height: 240px;
             background: linear-gradient(135deg, #1a1a2e, #09090e);
-            background-image: url('https://ibb.co');
+            background-image: url('https://i.ibb.co/DPfvmwms/IMG-0402.jpg');
             background-size: cover;
             background-position: center;
             border-bottom: 3px solid #8a2be2;
@@ -281,7 +281,7 @@ const htmlLandingPage = `<!DOCTYPE html>
             border-radius: 24px;
             border: 4px solid #141424;
             box-shadow: 0 8px 25px rgba(0,0,0,0.7);
-            background-image: url('https://ibb.co');
+            background-image: url('https://i.ibb.co/JRFxHJTn/IMG-0403.jpg');
             background-size: cover;
             background-position: center;
         }
