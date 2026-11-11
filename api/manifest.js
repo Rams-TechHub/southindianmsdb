@@ -1,547 +1,88 @@
-const { addonBuilder } = require("stremio-addon-sdk");
-const cheerio = require("cheerio");
-const fetch = globalThis.fetch;
+"use strict";
 
-// ==========================================================
-// 1. ADDON MANIFEST CONFIGURATION (Comprehensive Groupings)
-// ==========================================================
-const builder = new addonBuilder({
-    id: "org.southindiancinema.addon",
-    version: "1.8.0",
-    name: "South Indian Cinema Hub Pro",
-    description: "Fully automated, real-time live charts and handpicked masterpieces for South Indian cinema.",
-    resources: ["catalog", "meta", "stream"],
-    types: ["movie"],
-    catalogs: [
-        // 🏆 Main Blockbusters & Mega Collections
-        { type: "movie", id: "best_south_indian_movies", name: "🏆 Best South Indian Movies (All-Time)" },
-        { type: "movie", id: "top_250_south_cinema", name: "🎬 Top 250 South Indian Cinema Collection" },
-        { type: "movie", id: "hidden_gems_south", name: "💎 Hidden Gems & Underrated Masterpieces" },
-        { type: "movie", id: "modern_new_age_cinema", name: "🚀 New Age / Modern Cult Classics" },
+const { LANGUAGES, buildCatalogs, parseCatalogId, getCatalog } = require("../lib/tmdb");
+const { landingPage, ASSETS } = require("../lib/landing");
 
-        // ⚡ Live Top Rated Charts (Scraper-Driven)
-        { type: "movie", id: "live_malayalam", name: "⚡ Top Rated Malayalam (Live)" },
-        { type: "movie", id: "live_tamil", name: "⚡ Top Rated Tamil (Live)" },
-        { type: "movie", id: "live_telugu", name: "⚡ Top Rated Telugu (Live)" },
-        { type: "movie", id: "live_kannada", name: "⚡ Top Rated Kannada (Live)" },
+const ALL_LANGS = Object.keys(LANGUAGES);
+// Install path: /<32-char TMDB key>[_<ml-ta-te-kn>]/manifest.json
+const CONFIG_RE = /^([a-f0-9]{32})(?:_([a-z]{2}(?:-[a-z]{2})*))?$/i;
 
-        // 💰 Box Office Heavyweights (Highest Grossing)
-        { type: "movie", id: "highest_grossing_malayalam", name: "💰 Highest Grossing Malayalam Worldwide" },
-        { type: "movie", id: "highest_grossing_tamil", name: "💰 Highest Grossing Tamil Worldwide" },
-        { type: "movie", id: "highest_grossing_telugu", name: "💰 Highest Grossing Telugu Worldwide" },
-        { type: "movie", id: "highest_grossing_kannada", name: "💰 Highest Grossing Kannada Worldwide" },
-
-        // ⚔️ Action & Psychological Thrillers
-        { type: "movie", id: "top_30_action_movies", name: "⚔️ Top 30 South Indian Action Movies" },
-        { type: "movie", id: "imdb_south_action", name: "👊 South Indian Blockbuster Masala" },
-        { type: "movie", id: "top_30_thriller_movies", name: "🔍 Top 30 South Indian Thrillers" },
-        { type: "movie", id: "imdb_south_thrillers", name: "🕵️ South Indian Masterpiece Thrillers" },
-        { type: "movie", id: "top_20_mystery_movies", name: "🧩 Mind-Bending South Indian Mysteries" },
-        { type: "movie", id: "top_30_crime_movies", name: "🔪 Gritty South Indian Crime Sagas" },
-
-        // 😂 Ultimate Regional Comedy Collections
-        { type: "movie", id: "imdb_malayalam_comedy", name: "🤣 Malayalam Comedy Classics" },
-        { type: "movie", id: "imdb_tamil_comedy", name: "🤣 Tamil Comedy Classics" },
-        { type: "movie", id: "imdb_telugu_comedy", name: "🤣 Telugu Comedy Classics" },
-        { type: "movie", id: "imdb_kannada_comedy", name: "🤣 Kannada Comedy Classics" },
-
-        // 👁️ Regional Industry Thriller Showcases
-        { type: "movie", id: "malayalam_thrillers", name: "👁️ Pulse-Pounding Malayalam Thrillers" },
-        { type: "movie", id: "tamil_thrillers", name: "👁️ Suspenseful Tamil Thrillers" },
-        { type: "movie", id: "telugu_thrillers", name: "👁️ High-Voltage Telugu Thrillers" },
-        { type: "movie", id: "kannada_thrillers", name: "👁️ Sandalwood Mystery Thrillers" },
-
-        // 🎭 Curated Genre Dramas (Romance, Horror, Period)
-        { type: "movie", id: "top_30_drama_movies", name: "🎭 Intense South Indian Emotional Dramas" },
-        { type: "movie", id: "top_30_horror_movies", name: "👻 Bone-Chilling South Horror & Folklore" },
-        { type: "movie", id: "top_30_romantic_movies", name: "💖 Soulful South Indian Romance Chronicles" },
-        { type: "movie", id: "period_mythological_south", name: "🛡️ Epic Period & Mythological Sagas" },
-
-        // 📱 Modern Formats & Streaming Originals
-        { type: "movie", id: "web_series_south_india", name: "📺 Premium Web Series from South India" },
-        { type: "movie", id: "live_ott_exclusives", name: "📱 Direct-to-OTT South Exclusives" },
-        { type: "movie", id: "streaming_originals_collection", name: "🔥 Streaming Originals Collection" }
-    ]
-});
-
-// ==========================================================
-// 2. UNIVERSAL AUTOMATED URL MAPPING TABLE
-// ==========================================================
-const urlRouteMap = {
-    // ⚡ Top Rated Real-time Links
-    "live_malayalam": "https://imdb.com",
-    "live_tamil": "https://imdb.com",
-    "live_telugu": "https://imdb.com",
-    "live_kannada": "https://imdb.com", 
-
-    // 💰 Box Office & Highest Grossing Trackers
-    "highest_grossing_malayalam": "https://imdb.com", 
-    "highest_grossing_tamil": "https://imdb.com", 
-    "highest_grossing_telugu": "https://imdb.com",
-    "highest_grossing_kannada": "https://imdb.com" 
-};
-
-// ==========================================================
-// 3. STATIC MANUAL DATABASE COLLECTIONS
-// ==========================================================
-const manualLists = {
-    "best_south_indian_movies": [
-        { id: "tt11658274", name: "RRR (2022)", type: "movie" },
-        { id: "tt0107504", name: "Manichitrathazhu (1993)", type: "movie" },
-        { id: "tt2932994", name: "Baahubali: The Beginning (2015)", type: "movie" }
-    ],
-    "top_250_south_cinema": [
-        { id: "tt0093603", name: "Nayagan (1987)", type: "movie" },
-        { id: "tt1509144", name: "Anbe Sivam (2003)", type: "movie" }
-    ],
-    "hidden_gems_south": [
-        { id: "tt6741496", name: "C/o Kancharapalem (2018)", type: "movie" },
-        { id: "tt1506890", name: "Lucia (2013)", type: "movie" }
-    ],
-    "modern_new_age_cinema": [
-        { id: "tt13854728", name: "Minnal Murali (2021)", type: "movie" },
-        { id: "tt1214319", name: "Aavesham (2024)", type: "movie" }
-    ],
-    "top_30_action_movies": [
-        { id: "tt5051914", name: "K.G.F: Chapter 1 (2018)", type: "movie" },
-        { id: "tt8360104", name: "Vikram (2022)", type: "movie" }
-    ],
-    "imdb_south_action": [
-        { id: "tt21334812", name: "Leo (2023)", type: "movie" },
-        { id: "tt10332302", name: "Jailer (2023)", type: "movie" }
-    ],
-    "top_30_thriller_movies": [
-        { id: "tt7060344", name: "Ratsasan (2018)", type: "movie" },
-        { id: "tt4161640", name: "Kshanam (2016)", type: "movie" }
-    ],
-    "imdb_south_thrillers": [
-        { id: "tt2559534", name: "Drishyam (2013)", type: "movie" },
-        { id: "tt11790718", name: "Drishyam 2 (2021)", type: "movie" }
-    ],
-    "top_20_mystery_movies": [
-        { id: "tt5782012", name: "Evaru (2019)", type: "movie" },
-        { id: "tt5623040", name: "Kavaludaari (2019)", type: "movie" }
-    ],
-    "top_30_crime_movies": [
-        { id: "tt4844648", name: "Vada Chennai (2018)", type: "movie" },
-        { id: "tt4450374", name: "Vikram Vedha (2017)", type: "movie" }
-    ],
-    "imdb_malayalam_comedy": [
-        { id: "tt0104956", name: "Nadodikkattu (1987)", type: "movie" },
-        { id: "tt0102161", name: "Kilukkam (1991)", type: "movie" },
-        { id: "tt0134057", name: "Ramji Rao Speaking (1989)", type: "movie" }
-    ],
-    "imdb_tamil_comedy": [
-        { id: "tt2531070", name: "Jigarthanda (2014)", type: "movie" }
-    ],
-    "imdb_telugu_comedy": [
-        { id: "tt5918714", name: "Agent Sai Srinivasa Athreya (2019)", type: "movie" }
-    ],
-    "imdb_kannada_comedy": [
-        { id: "tt4458856", name: "Kirik Party (2016)", type: "movie" }
-    ],
-    "malayalam_thrillers": [
-        { id: "tt12144362", name: "Bramayugam (2024)", type: "movie" }
-    ],
-    "tamil_thrillers": [
-        { id: "tt3013658", name: "Kaithi (2019)", type: "movie" }
-    ],
-    "telugu_thrillers": [
-        { id: "tt5025732", name: "Goodachari (2018)", type: "movie" }
-    ],
-    "kannada_thrillers": [
-        { id: "tt9166058", name: "Kantara (2022)", type: "movie" }
-    ],
-    "top_30_drama_movies": [
-        { id: "tt11516084", name: "Manjummel Boys (2024)", type: "movie" },
-        { id: "tt5051756", name: "Kumbalangi Nights (2019)", type: "movie" }
-    ],
-    "top_30_horror_movies": [
-        { id: "tt12144362", name: "Bramayugam (2024)", type: "movie" }
-    ],
-    "top_30_romantic_movies": [
-        { id: "tt5260170", name: "96 (2018)", type: "movie" },
-        { id: "tt8283830", name: "Sita Ramam (2022)", type: "movie" }
-    ],
-    "period_mythological_south": [
-        { id: "tt3503120", name: "Baahubali 2: The Conclusion (2017)", type: "movie" }
-    ],
-    "web_series_south_india": [
-        { id: "tt12361178", name: "The Family Man Season 2", type: "movie" }
-    ],
-    "live_ott_exclusives": [
-        { id: "tt13854728", name: "Minnal Murali (Netflix)", type: "movie" }
-    ],
-    "streaming_originals_collection": [
-        { id: "tt6185882", name: "Jai Bhim (Prime Video)", type: "movie" }
-    ]
-};
-
-// ==========================================================
-// 4. THE UNIVERSAL AUTOMATED SCRAPER ENGINE
-// ==========================================================
-async function scrapeIMDbChart(targetUrl) {
-    try {
-        const response = await fetch(targetUrl, {
-            headers: { 
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept-Language": "en-US,en;q=0.9"
-            }
-        });
-        const html = await response.text();
-        const $ = cheerio.load(html);
-        const movies = [];
-
-        $("a[href*='/title/tt']").each((index, element) => {
-            const href = $(element).attr("href");
-            const match = href.match(/(tt\d+)/);
-            const titleText = $(element).text().trim();
-
-            if (match && titleText && !movies.some(m => m.id === match[1])) {
-                if (titleText.length > 1 && !titleText.startsWith("See more") && !titleText.startsWith("Back to top")) {
-                    movies.push({
-                        id: match[1], // Extracts 'tt0000000' cleanly via regex index
-                        name: titleText,
-                        type: "movie"
-                    });
-                }
-            }
-        });
-
-        return movies.slice(0, 25);
-    } catch (error) {
-        console.error(`Scraping failed for target ${targetUrl}:`, error);
-        return [];
-    }
+function parseConfig(seg) {
+  const m = CONFIG_RE.exec(seg || "");
+  if (!m) return null;
+  const picked = m[2] ? m[2].toLowerCase().split("-").filter((l) => LANGUAGES[l]) : [];
+  return { key: m[1], langs: picked.length ? picked : ALL_LANGS };
 }
 
-// ==========================================================
-// 5. STREMIO ROUTING CONNECTOR HOOK
-// ==========================================================
-builder.defineCatalogHandler(async (args) => {
-    console.log("Requested row:", args.id);
+function buildManifest(cfg) {
+  return {
+    id: "org.southindiancinema.addon",
+    version: "2.0.0",
+    name: "South Indian Cinema Hub",
+    description: "Malayalam, Tamil, Telugu and Kannada movies and series: popular, top rated, new releases, box office and genre rows.",
+    logo: ASSETS.logo,
+    background: ASSETS.backdrop,
+    // Catalog only: titles use IMDb ids, so Cinemeta supplies the details
+    // and your stream addons match them as usual.
+    resources: ["catalog"],
+    types: ["movie", "series"],
+    catalogs: buildCatalogs(cfg ? cfg.langs : ALL_LANGS),
+    behaviorHints: { configurable: true, configurationRequired: !cfg },
+  };
+}
 
-    if (urlRouteMap[args.id]) {
-        const scrapedMovies = await scrapeIMDbChart(urlRouteMap[args.id]);
-        return { metas: scrapedMovies };
-    }
+function send(res, status, type, body, cache) {
+  res.statusCode = status;
+  res.setHeader("Content-Type", type);
+  res.setHeader("Cache-Control", cache || "no-store");
+  res.end(body);
+}
+const json = (res, status, obj, cache) => send(res, status, "application/json; charset=utf-8", JSON.stringify(obj), cache);
 
-    const staticList = manualLists[args.id];
-    return { metas: staticList || [] };
-});
-
-builder.defineMetaHandler((args) => Promise.resolve({ meta: {} }));
-builder.defineStreamHandler((args) => Promise.resolve({ streams: [] }));
-
-const addonInterface = builder.getInterface();
-// ==========================================================
-// 6. UI USER FRONTEND LAYOUT VIEW (Zero Native Browser Popups)
-// ==========================================================
-const htmlLandingPage = `<!DOCTYPE html> 
-<html> 
-<head> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Configure South Indian Cinema Hub Pro</title> 
-    <style> 
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: #09090e; 
-            background-image: linear-gradient(to bottom, rgba(9, 9, 14, 0.75), rgba(9, 9, 14, 0.95)), url('https://i.ibb.co/LDpPXv9w/Gemini-Generated-Image-ga4cngga4cngga4c.jpg'); /* Placed your customized backdrop url */
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: white; 
-            text-align: center; 
-            padding: 0;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        } 
-        .banner {
-            width: 100%;
-            height: 240px;
-            background: linear-gradient(135deg, #1a1a2e, #09090e);
-            background-image: url('https://i.ibb.co/DPfvmwms/IMG-0402.jpg');
-            background-size: cover;
-            background-position: center;
-            border-bottom: 3px solid #8a2be2;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .logo-container {
-            position: relative;
-            margin-top: -60px;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
-        .logo {
-            width: 110px;
-            height: 110px;
-            border-radius: 24px;
-            border: 4px solid #141424;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
-            background-image: url('https://i.ibb.co/JRFxHJTn/IMG-0403.jpg');
-            background-size: cover;
-            background-position: center;
-        }
-        .box { 
-            max-width: 550px; 
-            width: 90%;
-            margin: 20px auto 40px auto; 
-            background: rgba(20, 20, 36, 0.85); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 40px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(138, 43, 226, 0.2);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6); 
-            box-sizing: border-box; 
-        } 
-        h2 { 
-            margin: 0 0 5px 0; 
-            color: #a25bf2; 
-            font-size: 28px; 
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        } 
-        .subtitle { 
-            color: #8a2be2; 
-            font-size: 12px; 
-            margin-bottom: 25px; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            font-weight: 700;
-        }
-        p {
-            font-size: 15px; 
-            color: #c0c0db; 
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        input { 
-            width: 100%; 
-            padding: 16px; 
-            border-radius: 8px; 
-            border: 1px solid rgba(255,255,255,0.15); 
-            background: rgba(10, 10, 20, 0.6); 
-            color: white; 
-            box-sizing: border-box; 
-            text-align: center; 
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        } 
-        input:focus {
-            outline: none;
-            border-color: #8a2be2;
-            box-shadow: 0 0 12px rgba(138, 43, 226, 0.4), inset 0 2px 4px rgba(0,0,0,0.3);
-        }
-        button { 
-            background: linear-gradient(135deg, #8a2be2, #6f1ab6); 
-            color: white; 
-            border: none; 
-            padding: 16px 25px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 700; 
-            width: 100%; 
-            font-size: 16px; 
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        } 
-        button:hover { 
-            background: linear-gradient(135deg, #9d4edd, #8a2be2); 
-            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
-            transform: translateY(-1px);
-        } 
-        
-        /* ==========================================================
-           🎨 SLEEK PREMIUM MODAL COMPONENT (Replaces Browser Alerts)
-           ========================================================== */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 10, 0.85);
-            backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            z-index: 1000;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-card {
-            background: #141424;
-            border: 1px solid rgba(138, 43, 226, 0.3);
-            border-radius: 16px;
-            padding: 35px; max-width: 500px; width: 90%;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            transform: scale(0.9);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            text-align: left;
-        }
-        .modal-overlay.active .modal-card { transform: scale(1); }
-        .modal-card h3 { margin: 0 0 10px 0; color: #a25bf2; font-size: 22px; font-weight: 700; }
-        .modal-card p { font-size: 14px; margin-bottom: 20px; color: #a4a4c1; }
-        
-        .copy-box {
-            display: flex; gap: 10px; margin-top: 15px; margin-bottom: 20px;
-        }
-        .copy-input {
-            flex: 1; margin: 0; background: #0b0b14; border: 1px solid #2a2a44;
-            padding: 12px; font-size: 13px; font-family: monospace; border-radius: 6px;
-            color: #d1d1e0; text-align: left;
-        }
-        .copy-btn {
-            width: auto; padding: 0 20px; font-size: 14px; background: #2a2a44;
-            box-shadow: none; border: 1px solid #3d3d5c;
-        }
-        .copy-btn:hover { background: #3d3d5c; box-shadow: none; }
-        .close-btn { background: transparent; border: 1px solid #8a2be2; color: #a25bf2; margin-top: 10px; }
-        .close-btn:hover { background: rgba(138, 43, 226, 0.1); }
-        .footer { font-size: 11px; color: #62627a; margin-top: 35px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; } 
-    </style> 
-</head> 
-<body> 
-    <div class="banner"></div>
-    <div class="logo-container">
-        <div class="logo"></div>
-    </div>
-
-    <div class="box"> 
-        <h2>South Indian Hub Setup</h2> 
-        <div class="subtitle">Powered by QiLabs.dev</div>
-        <p>Your custom subdomain is ready. Enter your TMDB API Key below to inject automated live catalogs directly into your streaming device feed rows.</p> 
-        
-        <input type="text" id="apikey" placeholder="Paste TMDB API Key Here..." />
-        <button onclick="installAddon()">Install Addon</button> 
-        
-        <div class="footer">© 2026 QiLabs Technology Services. All rights reserved.</div>
-    </div> 
-
-    <!-- Dynamic Premium Modal Structural Layout Overlay -->
-    <div class="modal-overlay" id="statusModal">
-        <div class="modal-card">
-            <h3>Addon Ready!</h3>
-            <p>We are launching Stremio on your device. If your streaming app doesn't open automatically, use the field below to copy the link and paste it into your app's Addons dashboard manually.</p>
-            
-            <div class="copy-box">
-                <input type="text" class="copy-input" id="manifestOutputUrl" readonly />
-                <button class="copy-btn" id="copyActionBtn" onclick="copyManifestToClipboard()">Copy</button>
-            </div>
-            
-            <button class="close-btn" onclick="toggleModal(false)">Close Panel</button>
-        </div>
-    </div>
-    <script> 
-            <script> 
-        function toggleModal(show) {
-            var modal = document.getElementById('statusModal');
-            if (show) modal.classList.add('active');
-            else modal.classList.add('active'); 
-            if (!show) modal.classList.remove('active');
-        }
-
-         function installAddon() { 
-            var key = document.getElementById('apikey').value.trim(); 
-            if (!key) { 
-                alert('Please enter a valid TMDB API Key first.'); 
-                return; 
-            } 
-            
-            // Build absolute destination paths cleanly
-            var cleanManifestUrl = window.location.origin + '/' + key + '/manifest.json';
-            var appProtocolUrl = 'stremio://' + window.location.host + '/' + key + '/manifest.json';
-            
-            // Populate modal values before popping it open
-            document.getElementById('manifestOutputUrl').value = cleanManifestUrl;
-            
-            // Reset button theme states natively
-            var copyBtn = document.getElementById('copyActionBtn');
-            copyBtn.innerText = "Copy";
-            copyBtn.style.background = "#2a2a44";
-            
-            // 1. Instantly fade in the premium glassmorphic modal box panel
-            toggleModal(true);
-            
-            // 2. Fire deep-link deep protocol to prompt Stremio app to boot locally
-            setTimeout(function() {
-                window.location.href = appProtocolUrl;
-            }, 300);
-        } 
-
-        function copyManifestToClipboard() {
-            var copyText = document.getElementById('manifestOutputUrl');
-            
-            // Highlight text inside field for secure iOS/Android mobile selection copying
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            
-            navigator.clipboard.writeText(copyText.value).then(function() {
-                var copyBtn = document.getElementById('copyActionBtn');
-                copyBtn.innerText = "Copied!";
-                copyBtn.style.background = "#8a2be2";
-            }, function() {
-                alert("Clipboard permissions blocked. Please select and copy the input link text box manually.");
-            });
-        }
-    </script>
-</body> 
-</html>`;
-// ==========================================================
-// 7. VERCEL LAMBDA RUNTIME PROCESSOR
-// ==========================================================
 module.exports = async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  if (req.method === "OPTIONS") return send(res, 204, "text/plain", "");
 
-    if (req.method === "OPTIONS") {
-        res.status(200).end();
-        return;
+  const { pathname } = new URL(req.url, "http://localhost");
+  const segs = pathname.split("/").filter(Boolean);
+  const cfg = parseConfig(segs[0]);
+  const rest = cfg ? segs.slice(1) : segs;
+  const last = rest[rest.length - 1];
+
+  // Landing / configure page
+  if (rest.length === 0 || last === "configure" || (rest.length === 2 && rest[0] === "api" && rest[1] === "manifest")) {
+    return send(res, 200, "text/html; charset=utf-8", landingPage(), "public, max-age=300");
+  }
+
+  if (last === "manifest.json") {
+    return json(res, 200, buildManifest(cfg), "public, max-age=300");
+  }
+
+  if (rest[0] === "catalog") {
+    // /catalog/<type>/<id>.json  or  /catalog/<type>/<id>/<extra>.json  (extra e.g. genre=Top%20Rated&skip=20)
+    const id = (rest[2] || "").replace(/\.json$/, "");
+    const extra = new URLSearchParams((rest[3] || "").replace(/\.json$/, ""));
+    const target = parseCatalogId(id);
+    if (!cfg || !target || target.type !== rest[1] || !cfg.langs.includes(target.lang)) {
+      return json(res, 200, { metas: [] });
     }
-
-    let urlString = req.url.trim().replace(/\r?\n|\r/g, "");
-
-    if (urlString === "/" || urlString === "/api/manifest" || urlString === "") {
-        res.setHeader("Content-Type", "text/html");
-        res.status(200).end(htmlLandingPage);
-        return;
+    try {
+      const metas = await getCatalog({
+        key: cfg.key,
+        type: target.type,
+        lang: target.lang,
+        genre: extra.get("genre") || undefined,
+        skip: parseInt(extra.get("skip"), 10) || 0,
+        search: extra.get("search") || undefined,
+      });
+      return json(res, 200, { metas }, "public, s-maxage=3600, stale-while-revalidate=86400");
+    } catch (err) {
+      console.error(`catalog ${id} failed:`, err.message);
+      return json(res, 200, { metas: [] });
     }
+  }
 
-    res.setHeader("Content-Type", "application/json");
-
-    if (urlString.endsWith("manifest.json")) {
-        res.status(200).end(JSON.stringify(builder.getInterface().manifest));
-        return;
-    }
-
-    if (urlString.includes("/catalog/")) {
-        const parts = urlString.split("/");
-        const catalogFileName = parts[parts.length - 1]; 
-        const catalogId = catalogFileName.replace(".json", "");
-
-        if (urlRouteMap[catalogId]) {
-            const scrapedMovies = await scrapeIMDbChart(urlRouteMap[catalogId]);
-            res.status(200).end(JSON.stringify({ metas: scrapedMovies }));
-        } else {
-            const staticList = manualLists[catalogId];
-            res.status(200).end(JSON.stringify({ metas: staticList || [] }));
-        }
-        return;
-    }
-
-    if (urlString.includes("/meta/")) {
-        res.status(200).end(JSON.stringify({ meta: {} }));
-        return;
-    }
-    if (urlString.includes("/stream/")) {
-        res.status(200).end(JSON.stringify({ streams: [] }));
-        return;
-    }
-
-    res.status(404).end(JSON.stringify({ error: "Route Not Supported", debugPath: urlString }));
+  return json(res, 404, { error: "Not found" });
 };
