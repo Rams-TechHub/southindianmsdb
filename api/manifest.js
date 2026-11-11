@@ -419,12 +419,21 @@ const htmlLandingPage = `<!DOCTYPE html>
 </body> 
 </html>`;
 // ==========================================================
-// 7. VERCEL LAMBDA RUNTIME PROCESSOR
+// 7. VERCEL LAMBDA RUNTIME PROCESSOR (Resilient Fix)
 // ==========================================================
 module.exports = async (req, res) => {
+    // 1. Enforce global CORS headers so Stremio Desktop/Mobile can cross-fetch cleanly
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 
+    // Handle preflight OPTIONS requests cleanly
+    if (req.method === "OPTIONS") {
+        res.status(200).end();
+        return;
+    }
+
+    // 2. Deliver configuration panel HTML landing frame
     if (req.url === "/" || req.url === "/api/manifest") {
         res.setHeader("Content-Type", "text/html");
         res.status(200).end(htmlLandingPage);
@@ -433,13 +442,17 @@ module.exports = async (req, res) => {
 
     res.setHeader("Content-Type", "application/json");
 
-    const urlParts = req.url.split("/");
-    const apiKey = urlParts[1]; 
-    const cleanPath = req.url.replace(`/${apiKey}`, "").replace("/api/manifest", "");
+    // 3. SECURE REGEX REWRITE: Safely strip out ANY 32-character hex API key pattern from the URL
+    // This leaves clean paths like /manifest.json or /catalog/movie/id.json regardless of length
+    const cleanPath = req.url.replace(/\/[a-fA-F0-9]{32}/, "").replace("/api/manifest", "");
 
+    console.log("Incoming request:", req.url, "-> Cleansed path for Stremio SDK:", cleanPath);
+
+    // 4. Pass execution to Stremio interface engine
     addonInterface.handle(cleanPath, (err, response) => {
         if (err) {
-            res.status(500).end(JSON.stringify(err));
+            console.error("Stremio Handler Error:", err);
+            res.status(500).end(JSON.stringify({ error: "Internal Handler Crash", details: err.message }));
         } else {
             res.status(200).end(JSON.stringify(response));
         }
