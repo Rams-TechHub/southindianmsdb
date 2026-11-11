@@ -235,7 +235,7 @@ builder.defineStreamHandler((args) => Promise.resolve({ streams: [] }));
 
 const addonInterface = builder.getInterface();
 // ==========================================================
-// 6. UI USER FRONTEND LAYOUT VIEW (Sleek Cinematic Redesign)
+// 6. UI USER FRONTEND LAYOUT VIEW (Zero Native Browser Popups)
 // ==========================================================
 const htmlLandingPage = `<!DOCTYPE html> 
 <html> 
@@ -246,8 +246,7 @@ const htmlLandingPage = `<!DOCTYPE html>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background: #09090e; 
-            /* 1. SEAMLESS CINEMATIC BACKDROP WALLPAPER CONFIGURATION */
-            background-image: linear-gradient(to bottom, rgba(9, 9, 14, 0.75), rgba(9, 9, 14, 0.95)), url('https://i.ibb.co/LDpPXv9w/Gemini-Generated-Image-ga4cngga4cngga4c.jpg');
+            background-image: linear-gradient(to bottom, rgba(9, 9, 14, 0.75), rgba(9, 9, 14, 0.95)), url('https://ibb.co'); /* Placed your customized backdrop url */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -264,7 +263,7 @@ const htmlLandingPage = `<!DOCTYPE html>
             width: 100%;
             height: 240px;
             background: linear-gradient(135deg, #1a1a2e, #09090e);
-            background-image: url('https://i.ibb.co/DPfvmwms/IMG-0402.jpg'); /* Stays mapped to your active banner */
+            background-image: url('https://ibb.co');
             background-size: cover;
             background-position: center;
             border-bottom: 3px solid #8a2be2;
@@ -282,7 +281,7 @@ const htmlLandingPage = `<!DOCTYPE html>
             border-radius: 24px;
             border: 4px solid #141424;
             box-shadow: 0 8px 25px rgba(0,0,0,0.7);
-            background-image: url('https://i.ibb.co/chvNXCW6/Gemini-Generated-Image-p27wbpp27wbpp27w.jpg'); /* Stays mapped to your active logo */
+            background-image: url('https://ibb.co');
             background-size: cover;
             background-position: center;
         }
@@ -290,7 +289,7 @@ const htmlLandingPage = `<!DOCTYPE html>
             max-width: 550px; 
             width: 90%;
             margin: 20px auto 40px auto; 
-            background: rgba(20, 20, 36, 0.85); /* Premium glassmorphism overlay transparent style */
+            background: rgba(20, 20, 36, 0.85); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             padding: 40px; 
@@ -320,17 +319,11 @@ const htmlLandingPage = `<!DOCTYPE html>
             line-height: 1.6;
             margin-bottom: 30px;
         }
-        .input-group {
-            position: relative;
-            width: 100%;
-            margin-bottom: 20px;
-        }
         input { 
             width: 100%; 
             padding: 16px; 
             border-radius: 8px; 
-            border: 1px solid rgba(255, 255, 255, 0.15); 
-            /* Changed from solid black to translucent glass */
+            border: 1px solid rgba(255,255,255,0.15); 
             background: rgba(10, 10, 20, 0.6); 
             color: white; 
             box-sizing: border-box; 
@@ -338,8 +331,8 @@ const htmlLandingPage = `<!DOCTYPE html>
             font-size: 16px;
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         } 
-
         input:focus {
             outline: none;
             border-color: #8a2be2;
@@ -365,16 +358,51 @@ const htmlLandingPage = `<!DOCTYPE html>
             box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
             transform: translateY(-1px);
         } 
-        button:active {
-            transform: translateY(1px);
+        
+        /* ==========================================================
+           🎨 SLEEK PREMIUM MODAL COMPONENT (Replaces Browser Alerts)
+           ========================================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 10, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 1000;
         }
-        .footer { 
-            font-size: 11px; 
-            color: #62627a; 
-            margin-top: 35px; 
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 20px;
-        } 
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: #141424;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 16px;
+            padding: 35px; max-width: 500px; width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: left;
+        }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+        .modal-card h3 { margin: 0 0 10px 0; color: #a25bf2; font-size: 22px; font-weight: 700; }
+        .modal-card p { font-size: 14px; margin-bottom: 20px; color: #a4a4c1; }
+        
+        .copy-box {
+            display: flex; gap: 10px; margin-top: 15px; margin-bottom: 20px;
+        }
+        .copy-input {
+            flex: 1; margin: 0; background: #0b0b14; border: 1px solid #2a2a44;
+            padding: 12px; font-size: 13px; font-family: monospace; border-radius: 6px;
+            color: #d1d1e0; text-align: left;
+        }
+        .copy-btn {
+            width: auto; padding: 0 20px; font-size: 14px; background: #2a2a44;
+            box-shadow: none; border: 1px solid #3d3d5c;
+        }
+        .copy-btn:hover { background: #3d3d5c; box-shadow: none; }
+        .close-btn { background: transparent; border: 1px solid #8a2be2; color: #a25bf2; margin-top: 10px; }
+        .close-btn:hover { background: rgba(138, 43, 226, 0.1); }
+        .footer { font-size: 11px; color: #62627a; margin-top: 35px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; } 
     </style> 
 </head> 
 <body> 
@@ -388,15 +416,34 @@ const htmlLandingPage = `<!DOCTYPE html>
         <div class="subtitle">Powered by QiLabs.dev</div>
         <p>Your custom subdomain is ready. Enter your TMDB API Key below to inject automated live catalogs directly into your streaming device feed rows.</p> 
         
-        <div class="input-group">
-            <input type="text" id="apikey" placeholder="Paste TMDB API Key Here..." />
-        </div>
+        <input type="text" id="apikey" placeholder="Paste TMDB API Key Here..." />
         <button onclick="installAddon()">Install Addon</button> 
         
         <div class="footer">© 2026 QiLabs Technology Services. All rights reserved.</div>
     </div> 
 
+    <!-- Dynamic Premium Modal Structural Layout Overlay -->
+    <div class="modal-overlay" id="statusModal">
+        <div class="modal-card">
+            <h3>Addon Ready!</h3>
+            <p>We are launching Stremio on your device. If your streaming app doesn't open automatically, use the field below to copy the link and paste it into your app's Addons dashboard manually.</p>
+            
+            <div class="copy-box">
+                <input type="text" class="copy-input" id="manifestOutputUrl" readonly />
+                <button class="copy-btn" id="copyActionBtn" onclick="copyManifestToClipboard()">Copy</button>
+            </div>
+            
+            <button class="close-btn" onclick="toggleModal(false)">Close Panel</button>
+        </div>
+    </div>
     <script> 
+            <script> 
+        function toggleModal(show) {
+            var modal = document.getElementById('statusModal');
+            if (show) modal.classList.add('active');
+            if (!show) modal.classList.remove('active');
+        }
+
         function installAddon() { 
             var key = document.getElementById('apikey').value.trim(); 
             if (!key) { alert('Please enter a valid TMDB API Key first.'); return; } 
@@ -404,25 +451,36 @@ const htmlLandingPage = `<!DOCTYPE html>
             var cleanManifestUrl = window.location.origin + '/' + key + '/manifest.json';
             var appProtocolUrl = 'stremio://' + window.location.host + '/' + key + '/manifest.json';
             
-            var confirmBox = confirm("Attempting to open Stremio application directly...\\n\\nIf nothing happens, click OK to copy your custom Manifest URL to your clipboard for manual pasting into Nuvio or Stremio!");
+            document.getElementById('manifestOutputUrl').value = cleanManifestUrl;
+            document.getElementById('copyActionBtn').innerText = "Copy";
+            document.getElementById('copyActionBtn').style.background = "#2a2a44";
             
-            if (confirmBox) {
-                navigator.clipboard.writeText(cleanManifestUrl).then(function() {
-                    alert("Copied to clipboard successfully!\\n\\nPaste this URL directly into Nuvio or Stremio's Addon search field:\\n\\n" + cleanManifestUrl);
-                }, function() {
-                    alert("Clipboard access blocked. Please manually copy this URL:\\n\\n" + cleanManifestUrl);
-                });
-            }
-            window.location.href = appProtocolUrl;
+            toggleModal(true);
+            
+            setTimeout(function() {
+                window.location.href = appProtocolUrl;
+            }, 300);
         } 
+
+        function copyManifestToClipboard() {
+            var copyText = document.getElementById('manifestOutputUrl');
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(copyText.value).then(function() {
+                document.getElementById('copyActionBtn').innerText = "Copied!";
+                document.getElementById('copyActionBtn').style.background = "#8a2be2";
+            }, function() {
+                alert("Please select and copy the text box link manually.");
+            });
+        }
     </script> 
 </body> 
 </html>`;
 // ==========================================================
-// 7. VERCEL LAMBDA RUNTIME PROCESSOR (The Universal Routing Fix)
+// 7. VERCEL LAMBDA RUNTIME PROCESSOR
 // ==========================================================
 module.exports = async (req, res) => {
-    // 1. Enforce global CORS headers so Stremio can read your serverless responses
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -432,11 +490,8 @@ module.exports = async (req, res) => {
         return;
     }
 
-    // 2. Cleanse and normalize the incoming URL string
-    // This strips out white spaces, line breaks, and your 32-character API key
     let urlString = req.url.trim().replace(/\r?\n|\r/g, "");
 
-    // 3. Deliver the landing configuration page if hitting the base domain root
     if (urlString === "/" || urlString === "/api/manifest" || urlString === "") {
         res.setHeader("Content-Type", "text/html");
         res.status(200).end(htmlLandingPage);
@@ -445,16 +500,14 @@ module.exports = async (req, res) => {
 
     res.setHeader("Content-Type", "application/json");
 
-    // 4. ROUTE A: Handle Manifest requests (Matches if URL ends with manifest.json)
     if (urlString.endsWith("manifest.json")) {
         res.status(200).end(JSON.stringify(builder.getInterface().manifest));
         return;
     }
 
-    // 5. ROUTE B: Handle Catalog requests (/catalog/movie/id.json)
     if (urlString.includes("/catalog/")) {
         const parts = urlString.split("/");
-        const catalogFileName = parts[parts.length - 1]; // e.g., 'imdb_live_malayalam.json'
+        const catalogFileName = parts[parts.length - 1]; 
         const catalogId = catalogFileName.replace(".json", "");
 
         if (urlRouteMap[catalogId]) {
@@ -467,7 +520,6 @@ module.exports = async (req, res) => {
         return;
     }
 
-    // 6. ROUTE C: Fallback placeholders for stream/meta requests to keep the client loop safe
     if (urlString.includes("/meta/")) {
         res.status(200).end(JSON.stringify({ meta: {} }));
         return;
@@ -477,6 +529,5 @@ module.exports = async (req, res) => {
         return;
     }
 
-    // Catch-all response shield
     res.status(404).end(JSON.stringify({ error: "Route Not Supported", debugPath: urlString }));
 };
