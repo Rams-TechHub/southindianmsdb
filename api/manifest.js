@@ -432,8 +432,12 @@ module.exports = async (req, res) => {
         return;
     }
 
-    // 2. Deliver the beautiful configuration page
-    if (req.url === "/" || req.url === "/api/manifest") {
+    // 2. Cleanse and normalize the incoming URL string
+    // This strips out white spaces, line breaks, and your 32-character API key
+    let urlString = req.url.trim().replace(/\r?\n|\r/g, "");
+
+    // 3. Deliver the landing configuration page if hitting the base domain root
+    if (urlString === "/" || urlString === "/api/manifest" || urlString === "") {
         res.setHeader("Content-Type", "text/html");
         res.status(200).end(htmlLandingPage);
         return;
@@ -441,23 +445,18 @@ module.exports = async (req, res) => {
 
     res.setHeader("Content-Type", "application/json");
 
-    // 3. Extract the requested resource route endpoint by reading the end of the URL path
-    const urlString = req.url;
-    
-    // ROUTE A: Handle Manifest requests (/manifest.json)
+    // 4. ROUTE A: Handle Manifest requests (Matches if URL ends with manifest.json)
     if (urlString.endsWith("manifest.json")) {
         res.status(200).end(JSON.stringify(builder.getInterface().manifest));
         return;
     }
 
-    // ROUTE B: Handle Catalog requests (/catalog/movie/id.json)
+    // 5. ROUTE B: Handle Catalog requests (/catalog/movie/id.json)
     if (urlString.includes("/catalog/")) {
-        // Isolate the specific row ID segment from the Stremio request
         const parts = urlString.split("/");
         const catalogFileName = parts[parts.length - 1]; // e.g., 'imdb_live_malayalam.json'
         const catalogId = catalogFileName.replace(".json", "");
 
-        // Execute your scraper/manual database router logic natively
         if (urlRouteMap[catalogId]) {
             const scrapedMovies = await scrapeIMDbChart(urlRouteMap[catalogId]);
             res.status(200).end(JSON.stringify({ metas: scrapedMovies }));
@@ -468,7 +467,7 @@ module.exports = async (req, res) => {
         return;
     }
 
-    // ROUTE C: Fallback placeholders for stream/meta requests to keep the client loop safe
+    // 6. ROUTE C: Fallback placeholders for stream/meta requests to keep the client loop safe
     if (urlString.includes("/meta/")) {
         res.status(200).end(JSON.stringify({ meta: {} }));
         return;
@@ -479,5 +478,5 @@ module.exports = async (req, res) => {
     }
 
     // Catch-all response shield
-    res.status(404).end(JSON.stringify({ error: "Route Not Supported" }));
+    res.status(404).end(JSON.stringify({ error: "Route Not Supported", debugPath: urlString }));
 };
