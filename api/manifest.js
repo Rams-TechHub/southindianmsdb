@@ -329,8 +329,9 @@ const htmlLandingPage = `<!DOCTYPE html>
             width: 100%; 
             padding: 16px; 
             border-radius: 8px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            background: rgba(15, 15, 31, 0.9); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            /* Changed from solid black to translucent glass */
+            background: rgba(10, 10, 20, 0.6); 
             color: white; 
             box-sizing: border-box; 
             text-align: center; 
@@ -338,6 +339,7 @@ const htmlLandingPage = `<!DOCTYPE html>
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         } 
+
         input:focus {
             outline: none;
             border-color: #8a2be2;
