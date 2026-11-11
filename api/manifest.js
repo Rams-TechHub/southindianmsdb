@@ -419,21 +419,20 @@ const htmlLandingPage = `<!DOCTYPE html>
 </body> 
 </html>`;
 // ==========================================================
-// 7. VERCEL LAMBDA RUNTIME PROCESSOR (Resilient Fix)
+// 7. VERCEL LAMBDA RUNTIME PROCESSOR (The Universal Routing Fix)
 // ==========================================================
 module.exports = async (req, res) => {
-    // 1. Enforce global CORS headers so Stremio Desktop/Mobile can cross-fetch cleanly
+    // 1. Enforce global CORS headers so Stremio can read your serverless responses
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 
-    // Handle preflight OPTIONS requests cleanly
     if (req.method === "OPTIONS") {
         res.status(200).end();
         return;
     }
 
-    // 2. Deliver configuration panel HTML landing frame
+    // 2. Deliver the beautiful configuration page
     if (req.url === "/" || req.url === "/api/manifest") {
         res.setHeader("Content-Type", "text/html");
         res.status(200).end(htmlLandingPage);
@@ -442,19 +441,43 @@ module.exports = async (req, res) => {
 
     res.setHeader("Content-Type", "application/json");
 
-    // 3. SECURE REGEX REWRITE: Safely strip out ANY 32-character hex API key pattern from the URL
-    // This leaves clean paths like /manifest.json or /catalog/movie/id.json regardless of length
-    const cleanPath = req.url.replace(/\/[a-fA-F0-9]{32}/, "").replace("/api/manifest", "");
+    // 3. Extract the requested resource route endpoint by reading the end of the URL path
+    const urlString = req.url;
+    
+    // ROUTE A: Handle Manifest requests (/manifest.json)
+    if (urlString.endsWith("manifest.json")) {
+        res.status(200).end(JSON.stringify(builder.getInterface().manifest));
+        return;
+    }
 
-    console.log("Incoming request:", req.url, "-> Cleansed path for Stremio SDK:", cleanPath);
+    // ROUTE B: Handle Catalog requests (/catalog/movie/id.json)
+    if (urlString.includes("/catalog/")) {
+        // Isolate the specific row ID segment from the Stremio request
+        const parts = urlString.split("/");
+        const catalogFileName = parts[parts.length - 1]; // e.g., 'imdb_live_malayalam.json'
+        const catalogId = catalogFileName.replace(".json", "");
 
-    // 4. Pass execution to Stremio interface engine
-    addonInterface.handle(cleanPath, (err, response) => {
-        if (err) {
-            console.error("Stremio Handler Error:", err);
-            res.status(500).end(JSON.stringify({ error: "Internal Handler Crash", details: err.message }));
+        // Execute your scraper/manual database router logic natively
+        if (urlRouteMap[catalogId]) {
+            const scrapedMovies = await scrapeIMDbChart(urlRouteMap[catalogId]);
+            res.status(200).end(JSON.stringify({ metas: scrapedMovies }));
         } else {
-            res.status(200).end(JSON.stringify(response));
+            const staticList = manualLists[catalogId];
+            res.status(200).end(JSON.stringify({ metas: staticList || [] }));
         }
-    });
+        return;
+    }
+
+    // ROUTE C: Fallback placeholders for stream/meta requests to keep the client loop safe
+    if (urlString.includes("/meta/")) {
+        res.status(200).end(JSON.stringify({ meta: {} }));
+        return;
+    }
+    if (urlString.includes("/stream/")) {
+        res.status(200).end(JSON.stringify({ streams: [] }));
+        return;
+    }
+
+    // Catch-all response shield
+    res.status(404).end(JSON.stringify({ error: "Route Not Supported" }));
 };
