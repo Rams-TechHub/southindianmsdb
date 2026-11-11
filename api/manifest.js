@@ -441,22 +441,33 @@ const htmlLandingPage = `<!DOCTYPE html>
         function toggleModal(show) {
             var modal = document.getElementById('statusModal');
             if (show) modal.classList.add('active');
+            else modal.classList.add('active'); 
             if (!show) modal.classList.remove('active');
         }
 
-        function installAddon() { 
+         function installAddon() { 
             var key = document.getElementById('apikey').value.trim(); 
-            if (!key) { alert('Please enter a valid TMDB API Key first.'); return; } 
+            if (!key) { 
+                alert('Please enter a valid TMDB API Key first.'); 
+                return; 
+            } 
             
+            // Build absolute destination paths cleanly
             var cleanManifestUrl = window.location.origin + '/' + key + '/manifest.json';
             var appProtocolUrl = 'stremio://' + window.location.host + '/' + key + '/manifest.json';
             
+            // Populate modal values before popping it open
             document.getElementById('manifestOutputUrl').value = cleanManifestUrl;
-            document.getElementById('copyActionBtn').innerText = "Copy";
-            document.getElementById('copyActionBtn').style.background = "#2a2a44";
             
+            // Reset button theme states natively
+            var copyBtn = document.getElementById('copyActionBtn');
+            copyBtn.innerText = "Copy";
+            copyBtn.style.background = "#2a2a44";
+            
+            // 1. Instantly fade in the premium glassmorphic modal box panel
             toggleModal(true);
             
+            // 2. Fire deep-link deep protocol to prompt Stremio app to boot locally
             setTimeout(function() {
                 window.location.href = appProtocolUrl;
             }, 300);
@@ -464,17 +475,20 @@ const htmlLandingPage = `<!DOCTYPE html>
 
         function copyManifestToClipboard() {
             var copyText = document.getElementById('manifestOutputUrl');
+            
+            // Highlight text inside field for secure iOS/Android mobile selection copying
             copyText.select();
             copyText.setSelectionRange(0, 99999);
             
             navigator.clipboard.writeText(copyText.value).then(function() {
-                document.getElementById('copyActionBtn').innerText = "Copied!";
-                document.getElementById('copyActionBtn').style.background = "#8a2be2";
+                var copyBtn = document.getElementById('copyActionBtn');
+                copyBtn.innerText = "Copied!";
+                copyBtn.style.background = "#8a2be2";
             }, function() {
-                alert("Please select and copy the text box link manually.");
+                alert("Clipboard permissions blocked. Please select and copy the input link text box manually.");
             });
         }
-    </script> 
+    </script>
 </body> 
 </html>`;
 // ==========================================================
