@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "south-indian-addon",
   "version": "1.8.0",
   "description": "Fully automated live IMDb scraper addon for South Indian cinema.",
@@ -7,13 +6,5 @@
   "dependencies": {
     "stremio-addon-sdk": "^1.2.0",
     "cheerio": "^1.0.0-rc.12"
-=======
-  "name": "south-indian-msdb-addon",
-  "version": "1.6.0",
-  "description": "Stremio and Nuvio custom serverless addon for South Indian content.",
-  "main": "api/manifest.js",
-  "dependencies": {
-    "stremio-addon-sdk": "^1.2.0"
->>>>>>> 5f40e377596850da4358398701372a84ecba0b68
   }
 }
