@@ -234,12 +234,8 @@ builder.defineMetaHandler((args) => Promise.resolve({ meta: {} }));
 builder.defineStreamHandler((args) => Promise.resolve({ streams: [] }));
 
 const addonInterface = builder.getInterface();
-
 // ==========================================================
-// 6. UI USER FRONTEND LAYOUT VIEW
-// ==========================================================
-// ==========================================================
-// 6. UI USER FRONTEND LAYOUT VIEW
+// 6. UI USER FRONTEND LAYOUT VIEW (Sleek Cinematic Redesign)
 // ==========================================================
 const htmlLandingPage = `<!DOCTYPE html> 
 <html> 
@@ -250,85 +246,174 @@ const htmlLandingPage = `<!DOCTYPE html>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background: #09090e; 
+            /* 1. SEAMLESS CINEMATIC BACKDROP WALLPAPER CONFIGURATION */
+            background-image: linear-gradient(to bottom, rgba(9, 9, 14, 0.75), rgba(9, 9, 14, 0.95)), url('https://i.ibb.co/LDpPXv9w/Gemini-Generated-Image-ga4cngga4cngga4c.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: white; 
             text-align: center; 
             padding: 0;
             margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         } 
-        /* 1. PASTE YOUR IMGBB HORIZONTAL BANNER HERE */
         .banner {
             width: 100%;
-            height: 180px;
+            height: 240px;
             background: linear-gradient(135deg, #1a1a2e, #09090e);
-            background-image: url('https://i.ibb.co/DPfvmwms/IMG-0402.jpg'); 
+            background-image: url('https://i.ibb.co/DPfvmwms/IMG-0402.jpg'); /* Stays mapped to your active banner */
             background-size: cover;
             background-position: center;
             border-bottom: 3px solid #8a2be2;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        /* 2. PASTE YOUR IMGBB SQUARE LOGO HERE */
-        .logo {
-            width: 90px;
-            height: 90px;
-            border-radius: 20px;
-            margin-top: -45px;
-            border: 4px solid #1a1a2e;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            background-image: url('https://i.ibb.co/JRFxHJTn/IMG-0403.jpg');
-            background-size: cover;
+        .logo-container {
+            position: relative;
+            margin-top: -60px;
+            margin-bottom: 10px;
             display: inline-block;
         }
-        .box { max-width: 450px; margin: 20px auto; background: #1a1a2e; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box; } 
-        h2 { margin: 10px 0; color: #a25bf2; font-size: 24px; } 
-        .subtitle { color: #8e8e9f; font-size: 13px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 6px; border: 1px solid #333; background: #0f0f1f; color: white; box-sizing: border-box; text-align: center; } 
-        button { background: #8a2be2; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; } 
-        button:hover { background: #9d4edd; } 
+        .logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 24px;
+            border: 4px solid #141424;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+            background-image: url('https://i.ibb.co/chvNXCW6/Gemini-Generated-Image-p27wbpp27wbpp27w.jpg'); /* Stays mapped to your active logo */
+            background-size: cover;
+            background-position: center;
+        }
+        .box { 
+            max-width: 550px; 
+            width: 90%;
+            margin: 20px auto 40px auto; 
+            background: rgba(20, 20, 36, 0.85); /* Premium glassmorphism overlay transparent style */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); 
+            box-sizing: border-box; 
+        } 
+        h2 { 
+            margin: 0 0 5px 0; 
+            color: #a25bf2; 
+            font-size: 28px; 
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        } 
+        .subtitle { 
+            color: #8a2be2; 
+            font-size: 12px; 
+            margin-bottom: 25px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            font-weight: 700;
+        }
+        p {
+            font-size: 15px; 
+            color: #c0c0db; 
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        input { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(15, 15, 31, 0.9); 
+            color: white; 
+            box-sizing: border-box; 
+            text-align: center; 
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        } 
+        input:focus {
+            outline: none;
+            border-color: #8a2be2;
+            box-shadow: 0 0 12px rgba(138, 43, 226, 0.4), inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        button { 
+            background: linear-gradient(135deg, #8a2be2, #6f1ab6); 
+            color: white; 
+            border: none; 
+            padding: 16px 25px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            width: 100%; 
+            font-size: 16px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        } 
+        button:hover { 
+            background: linear-gradient(135deg, #9d4edd, #8a2be2); 
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+            transform: translateY(-1px);
+        } 
+        button:active {
+            transform: translateY(1px);
+        }
+        .footer { 
+            font-size: 11px; 
+            color: #62627a; 
+            margin-top: 35px; 
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 20px;
+        } 
     </style> 
 </head> 
 <body> 
-    <!-- Visual structural frames rendering your hosted assets -->
     <div class="banner"></div>
-    <div class="logo"></div>
+    <div class="logo-container">
+        <div class="logo"></div>
+    </div>
 
     <div class="box"> 
         <h2>South Indian Hub Setup</h2> 
         <div class="subtitle">Powered by QiLabs.dev</div>
         <p>Your custom subdomain is ready. Enter your TMDB API Key below to inject automated live catalogs directly into your streaming device feed rows.</p> 
-        <input type="text" id="apikey" placeholder="Paste TMDB API Key Here..." /> 
-        <button onclick="installAddon()">🚀 Install Addon</button> 
+        
+        <div class="input-group">
+            <input type="text" id="apikey" placeholder="Paste TMDB API Key Here..." />
+        </div>
+        <button onclick="installAddon()">Install Addon</button> 
+        
+        <div class="footer">© 2026 QiLabs Technology Services. All rights reserved.</div>
     </div> 
-    
-    <script>
-        function installAddon() {
-            var key = document.getElementById('apikey').value.trim();
-            if (!key) { 
-                alert('Please enter a valid TMDB API Key first.'); 
-                return; 
-            }
+
+    <script> 
+        function installAddon() { 
+            var key = document.getElementById('apikey').value.trim(); 
+            if (!key) { alert('Please enter a valid TMDB API Key first.'); return; } 
             
-            // 1. Build the clean, permanent web manifest address string
             var cleanManifestUrl = window.location.origin + '/' + key + '/manifest.json';
-            
-            // 2. Build the deep-linking app protocol trigger
             var appProtocolUrl = 'stremio://' + window.location.host + '/' + key + '/manifest.json';
             
-            // 3. Prompt a custom alert fallback window so you can manually copy it if the app doesn't trigger
-            var confirmBox = confirm("Attempting to open Stremio application directly...\\n\\nIf nothing happens or the app doesn't open, click OK to copy your custom Manifest URL to your clipboard for manual pasting into Nuvio or Stremio!");
+            var confirmBox = confirm("Attempting to open Stremio application directly...\\n\\nIf nothing happens, click OK to copy your custom Manifest URL to your clipboard for manual pasting into Nuvio or Stremio!");
             
             if (confirmBox) {
-                // Copy destination directly to clipboard
                 navigator.clipboard.writeText(cleanManifestUrl).then(function() {
-                    alert("Copied to clipboard successfully!\\n\\nPaste this URL directly into Nuvio or Stremio's Addon search field:\\n" + cleanManifestUrl);
+                    alert("Copied to clipboard successfully!\\n\\nPaste this URL directly into Nuvio or Stremio's Addon search field:\\n\\n" + cleanManifestUrl);
                 }, function() {
-                    // Fallback alert input text box reveal if browser blocks clipboard access permissions
-                    alert("Clipboard access blocked. Please manually select and copy this exact URL to paste into your app:\\n\\n" + cleanManifestUrl);
+                    alert("Clipboard access blocked. Please manually copy this URL:\\n\\n" + cleanManifestUrl);
                 });
             }
-            
-            // 4. Fire the protocol handler to trigger Stremio locally
             window.location.href = appProtocolUrl;
-        }
-    </script>
+        } 
+    </script> 
 </body> 
 </html>`;
 // ==========================================================
