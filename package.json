@@ -1,7 +1,7 @@
 {
   "name": "south-indian-addon",
-  "version": "2.0.0",
-  "description": "Stremio and Nuvio catalog add-on for Malayalam, Tamil, Telugu and Kannada movies and series, powered by TMDB.",
+  "version": "3.0.0",
+  "description": "Stremio and Nuvio catalog add-on for Malayalam, Tamil, Telugu and Kannada movies and series, with hand-picked collections.",
   "main": "api/manifest.js",
   "scripts": {
     "dev": "vercel dev",

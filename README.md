@@ -1,73 +1,64 @@
 # southindianmsdb
 
-A high-performance, serverless Stremio and Nuvio catalog add-on built to deliver structured South Indian media metadata metadata directly into your favorite streaming interfaces. Hosted dynamically on Vercel for lightning-fast, edge-optimized responses.
+Stremio and Nuvio catalog add-on for Malayalam, Tamil, Telugu and Kannada movies and series.
+Users install it with one tap. No API key needed on their side.
 
-## 🚀 Live Add-on URL
+## Setup (once)
 
-To install this add-on in Stremio or Nuvio, use the following production URL:
-👉 **`southindianmsdb.qilabs.dev`**
+1. Create a free TMDB API key (themoviedb.org, Settings, API, use the 32-character v3 key).
+2. In Vercel: Project, Settings, Environment Variables, add `TMDB_KEY` with that key.
+3. Redeploy.
 
----
+Users can still add their own key under "Advanced" on the install page. That is optional.
 
-## ✨ Features
+Optional: add `MDBLIST_KEY` (free, from mdblist.com/preferences) to enable MDBList rows.
 
-- **Multi-Platform Support:** Fully compatible with both Stremio and Nuvio configuration layouts.
-- **South Indian Focus:** Aggregated catalog specifically serving Tamil, Telugu, Malayalam, and Kannada cinematic content ecosystems.
-- **Serverless & Fast:** Powered by Vercel Serverless Functions (`/api`), ensuring zero cold starts and global edge caching.
-- **Lightweight Architecture:** Structured strictly around the official Stremio Add-on SDK protocol standards.
-
----
-
-## 🛠️ Local Development & Setup
-
-If you want to run this project locally, clone it and set up the node environment:
-
-### 1. Prerequisites
-Make sure you have [Node.js](https://nodejs.org) installed (v18 or higher recommended).
-
-### 2. Installation
-Clone the repository and install the project dependencies:
-```bash
-git clone https://github.com
-cd southindianmsdb
-npm install
-```
-
-### 3. Run Locally
-Start the local serverless development environment using the Vercel CLI (or npm run script):
-```bash
-# Using Vercel CLI locally
-vercel dev
-
-# Or standard local node boot execution
-npm start
-```
-Your local manifest file will be accessible at `http://localhost:3000/api/manifest` or matching local routing rules.
-
----
-
-## 📦 Project Structure
+## Project structure
 
 ```text
-southindianmsdb/
-├── api/
-│   └── manifest.js     # Serverless endpoint exporting add-on metadata configurations
-├── package.json        # Project dependencies, build hooks, and node engine specs
-└── vercel.json         # Vercel deployment routes and clean URL rewrites configuration
+api/manifest.js    router: install page, manifest.json, catalog responses
+lib/catalogs.js    every row: rule-based lists, hand-picked collections, home rows
+lib/tmdb.js        TMDB client, title matching, IMDb ids
+lib/sources.js     Wikidata, Wikipedia and MDBList fetchers (cached 24 hours)
+lib/landing.js     install page
+vercel.json        rewrites everything to api/manifest.js
 ```
 
----
+## Adding collections
 
-## ☁️ Deployment
+Open `lib/catalogs.js`.
 
-This project is configured out-of-the-box for **Vercel** serverless environments:
+**Hand-picked collection** (never changes unless you edit it): add an entry under `CURATED`:
 
-1. Push your latest code changes to your GitHub branch (`main`).
-2. Connect your repository to your personal Vercel dashboard.
-3. Vercel automatically detects the `vercel.json` deployment rules and sets up the paths natively.
+```js
+{ name: "Mollywood Masterpieces", titles: ["Kireedam (1989)", "Kaithi (2019) tt9900782"] }
+```
 
----
+Write `Title (Year)`. Add an IMDb id at the end only if a title matches the wrong film.
+The first collection of each language also shows as its own row on the home screen.
 
-## 📄 License
+**Rule-based row** (refreshes by itself): add a line to `MOVIE_AUTO` or `SERIES_AUTO`:
 
-This project is open-source and available under the [MIT License](LICENSE).
+```js
+{ name: "Edge of the Seat", build: () => ({ with_genres: "53", "vote_average.gte": 6.3, "vote_count.gte": 30 }) }
+```
+
+Home screen rows are picked in `FEATURED_AUTO` and `FEATURED_SOURCE`.
+
+## Outside sources
+
+All in `lib/catalogs.js`, fetched by `lib/sources.js`. Results are cached for 24 hours, and if a source is down the last good copy is served.
+
+- **Wikidata (no key):** award rows (`WIKIDATA_THEMES`) and people rows (`PEOPLE`). Use the person's exact English name as Wikidata spells it. Films come with IMDb ids, so no TMDB call is needed.
+- **Wikipedia (no key):** `wikipediaLists` names the pages to read (box office rankings, Filmfare winners, last year's films). Italic film links in the tables become titles, which are then matched through TMDB. A page that doesn't exist gives an empty row.
+- **MDBList (needs `MDBLIST_KEY`):** paste public list URLs into `MDBLIST`. Rows only appear once the key is set.
+
+## Install paths
+
+- `/manifest.json` all languages
+- `/ml-ta/manifest.json` chosen languages (ml, ta, te, kn)
+- `/<32-char key>_ml-ta/manifest.json` chosen languages with the user's own TMDB key
+
+Responses are cached 6 hours at the Vercel edge, so TMDB is rarely called.
+
+This product uses the TMDB API but is not endorsed or certified by TMDB.
